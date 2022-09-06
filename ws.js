@@ -1,24 +1,66 @@
 
-/* NODEJS SQLITE SERVER
+/* 	NODEJS SQLITE API ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-	
-	resides in sql folder under web access root
-	npm install sqlite3 -g
-	npm install express
-	npm install forever
-	open port:8081
+	resides in sql folder in web-access root folder
+	npm install sqlite3
+	npm install express	npm install forever
+	open port: 3000
 	localhost: node sql.js
 	server: cd /opt/bitnami/wordpress/sql/ws.js | forever stop ws.js | forever start ws.js 
 
-*/
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  */
 
-	const sqlite3 = require('sqlite3').verbose();
+	const express=require("express");
+	const sqlite3=require('sqlite3').verbose();
+
 	var db;
+	var app=express();
+	
+	app.listen(3000, () => {
+		console.log("Express server running on port 3000");
+		});
 
-	Insert('a@b.com','666',"new one","{someData:123}")
-	GetByEmail("a@b.com");
+		app.get("/paGetByEmail", (req, res, next) => {								// ON GET BY EMAIL
+			if (req && req.query && req.query.email) {									// If valid params
+				Open();																	// Open SQL
+				db.serialize(() => {													// Serialize
+					db.all(`SELECT * FROM pa WHERE email = '${req.query.email}'`, (err, row) =>{ // Query DB
+						if (err) res.json({ err:err.message });							// Show error
+						else  	 res.json(row);											// Return data
+						});
+					});
+				Close();																// Close SQL
+				}
+			 });
+	
+		app.get("/paGetById", (req, res, next) => {									// ON GET BY ID
+			if (req && req.query && req.query.id) {										// If valid params
+				Open();																	// Open SQL
+				db.all(`SELECT * FROM pa WHERE id = '${req.query.id}'`, (err, row) =>{ 	// Query DB
+					if (err) res.json({ err:err.message });								// Show error
+					else  	 res.json(row);												// Return data
+					});
+				Close();																// Close SQL
+				}
+			});
+	
+		app.post("/paAddRow", (req, res, next) =>{									// ON ADD ROW
+			if (req && req.query && req.query.id) {										// If valid params
+				Open();																	// Open SQL
+				db.run(`INSERT INTO pa (email, password, date, deleted, type, title, data) 
+				VALUES('${email}','${password}',datetime("now"),'0','PA','${title}','${data}')`, 
+				function(err) {
+					if (err) res.json({ err:err.message });								// Show error
+					else 	 res.json({ row: this.lastID });							// Return row added
+					});
+				Close();																// Close SQL
+				}
+			});
+	
 
-	Close();
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// HELPERS
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	function Open()																	// OPEN DB
 	{
@@ -36,32 +78,4 @@
 	  		});
 	}
 	
-	function Insert(email, password, title, data)									// INSERT ROW
-	{
-		db.run(`INSERT INTO pa (email, password, date, deleted, type, title, data) 
-				VALUES('${email}','${password}',datetime("now"),'0','PA','${title}','${data}')`, 
-				function(err) {
-					if (err) console.error(err.message);
-					else console.log(`A row has been inserted with rowid ${this.lastID}`);
-					});
-	}
-
-	function GetById(id)															// GET ROW BY ID
-	{
-		db.serialize(() => {
-			db.all(`SELECT * FROM pa WHERE id = '${id}'`, (err, row) => {
-			if (err) console.error(err.message);
-			else 	 console.log(row);
-			});
-		});
-	}
-
-	function GetByEmail(email)														// GET ROW(S) BY EMAIL
-	{
-		db.serialize(() => {
-			db.all(`SELECT * FROM pa WHERE email = '${email}'`, (err, row) => {
-			if (err) console.error(err.message);
-			else 	 console.log(row);
-			});
-		});
-	}
+	function trace(params) {	console.log(params);  	};
