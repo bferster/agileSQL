@@ -36,10 +36,11 @@
 			let e=req.url.match(/[?&]email=([^&]+).*$/);									// Get email
 			let pw=req.url.match(/[?&]password=([^&]+).*$/);								// Get pw
 			let t=req.url.match(/[?&]type=([^&]+).*$/);										// Get type
+			let role=req.url.match(/[?&]role=([^&]+).*$/);									// Get role
 			e=e ? e[1] : "";	pw=pw ? pw[1] : ""; 	t=t ? t[1] : "";					// Get value, if any
 
 			if (act == "login") 															// LOGIN
-				LogIn(e, pw, "PALOGIN",(r)=>{ SendResponse(r, res) });						// Do login
+				LogIn(e, pw, "PALOGIN",role,(r)=>{ SendResponse(r, res) });					// Do login
 			else if (act == "list")															// LIST
 				List(e,"PA",(r)=>{ SendResponse(JSON.stringify(r), res); })					// Get from DB
 			else if (act == "load")															// LOAD
@@ -94,19 +95,22 @@
 		console.log(msg.substring(0,128));												// Log
 	}	
 
-	function LogIn(email, password, type, callback)										// LOGIN
+	function LogIn(email, password, type, role, callback)								// LOGIN
 	{
-		let role="";
 		try {
 			Open();																			// Open DB
-			db.all(`SELECT * FROM db WHERE email = '${email}' AND type = '${type}' AND role = '${role}'`, (err, rows) => {	// Look for email
+			trace(123,role)
+			let q=`SELECT * FROM db WHERE email = '${email}' AND type = '${type}'`;			// Make query
+			if (role) q+=` AND role = '${role}'`;											// Add role if set
+
+			db.all(q, (err, rows) => {														// Look for email
 				if (err) console.error(err.message);										// An error
 				else{																		// Good query
 					if (!rows.length) {														// No emails matched, must be a new user
 						db.run(`INSERT INTO db (email, password, date, type) VALUES('${email}','${password}',datetime("now"),'${type}')`, 
 							function(err) {													// Add their LOGIN											
 								if (err)	callback(err.message);							// Error
-								else 		callback("REGISTER");							// Registered
+								else 		callback(role ? role : "user");					// Return role
 								});
 						return;																// Quit
 						}
@@ -144,6 +148,7 @@
 		}
 		catch(e) { console.log(e) }
 	}
+	
 
 	function Save(email, password, title, data, type, callback)							// SAVE ROW
 	{
