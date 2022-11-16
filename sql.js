@@ -68,7 +68,7 @@
 		}
 	else server=http.createServer(OnRequest);											// Create an http server
 	server.listen(8081);																// Listen on port 8081
-	trace("SQL nodeJS Server running on "+os.hostname()+":"+server.address().port);		// Log server stats
+	trace("SQL nodeJS Server running on "+os.hostname());								// Log server stats
 
 // SQL ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
