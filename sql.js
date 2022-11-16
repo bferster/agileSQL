@@ -45,6 +45,8 @@
 				List(e,"PA",(r)=>{ SendResponse(JSON.stringify(r), res); })					// Get from DB
 			else if (act == "load")															// LOAD
 				Load(req.url.match(/id=(.*)/)[1],(r)=>{ SendResponse(JSON.stringify(r), res); }) // Get from DB
+			else if (act == "loadall")														// LOAD ALL
+				LoadAll(t,(r)=>{ SendResponse(JSON.stringify(r), res); }) 					// Get from DB
 			else if (act == "save") {														// SAVE
 				let body="";																// Hold body
 				req.on('data', function(data) {	body+=data;	});								// ON data
@@ -99,7 +101,6 @@
 	{
 		try {
 			Open();																			// Open DB
-			trace(123,role)
 			let q=`SELECT * FROM db WHERE email = '${email}' AND type = '${type}'`;			// Make query
 			if (role) q+=` AND role = '${role}'`;											// Add role if set
 
@@ -149,7 +150,19 @@
 		catch(e) { console.log(e) }
 	}
 	
-
+	function LoadAll(type, callback)													// GET ALL ROWS BY TYPE
+	{
+		try{
+			Open();																			// Open DB
+			db.all(`SELECT * FROM db WHERE type = '${type}'`, (err, row) => { 				// Query
+				if (err)	callback(err.message);											// Error
+				else 		callback(row);													// Registered
+				});
+			Close();																		// Close db
+		}
+		catch(e) { console.log(e) }
+	}
+	
 	function Save(email, password, title, data, type, callback)							// SAVE ROW
 	{
 			try{
