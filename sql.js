@@ -42,7 +42,7 @@
 			if (act == "login") 															// LOGIN
 				LogIn(e, pw, "PALOGIN",role,(r)=>{ SendResponse(r, res) });					// Do login
 			else if (act == "list")															// LIST
-				List(e,"PA",(r)=>{ SendResponse(JSON.stringify(r), res); })					// Get from DB
+				List(e,t,(r)=>{ SendResponse(JSON.stringify(r), res); })					// Get from DB
 			else if (act == "load")															// LOAD
 				Load(req.url.match(/id=(.*)/)[1],(r)=>{ SendResponse(JSON.stringify(r), res); }) // Get from DB
 			else if (act == "loadall")														// LOAD ALL
