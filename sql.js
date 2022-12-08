@@ -10,8 +10,9 @@
 //	npm install fs
 ///	open port:8081
 //	local: node sql.js
-//	server: cd /opt/bitnami/wordpress/pa | forever stop sql.js | forever start sql.js 
+//	server: cd /opt/bitnami/wordpress/db | forever stop sql.js | forever start sql.js 
 //	admin with sqlStudio.exe in c:/cc
+//  ssh -i c:/Bill/CC/js/agile.pem bitnami@54.88.128.161 (access console via terminal)
 
 	const sqlite3 = require('sqlite3').verbose();
 	const os = require("os");	
@@ -165,16 +166,32 @@
 	
 	function Save(email, password, title, data, type, callback)							// SAVE ROW
 	{
-			try{
-			Open();																		// Open DB
+		try{
+			Open();																			// Open DB
 			db.run(`INSERT INTO db (email, password, date, type, title, data) 
 					VALUES('${email}','${password}',datetime("now"),'${type}','${title}','${data}')`, 
-					function(err) {														// Insert
+					function(err) {															// Insert
 						trace(email+" saved...");
-						if (err)	callback(err.message);								// Error
-						else 		callback(""+this.lastID);							// Return row id
+						if (err)	callback(err.message);									// Error
+						else 		callback(""+this.lastID);								// Return row id
 				});
-			Close();																	// Close db
+			Close();																		// Close db
+			}
+		catch(e) { console.log(e) }
+	}
+
+	function Update(id, title, data, callback)											// UPDATE ROW
+	{
+			try{
+			Open();																			// Open DB
+			db.run(`UPDATE db SET date=datetime("now"), title='${title}', data='${data}' 
+					WHERE id='${id}' AND title ='${title}')`,
+					function(err) {															// Insert
+						trace(email+" updated...");
+						if (err)	callback(err.message);									// Error
+						else 		callback(""+this.lastID);								// Return row id
+				});
+			Close();																		// Close db
 			}
 		catch(e) { console.log(e) }
 	}
