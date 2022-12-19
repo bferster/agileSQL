@@ -9,7 +9,7 @@
 //	npm install os
 //	npm install fs
 ///	open port:8081
-//	local: node sql.js
+//	local: node ../agileSQL/sql.js
 //	server: cd /opt/bitnami/wordpress/db | forever stop sql.js | forever start sql.js 
 //	admin with sqlStudio.exe in c:/cc
 //  ssh -i c:/Bill/CC/js/agile.pem bitnami@54.88.128.161 (access console via terminal)
