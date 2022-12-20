@@ -38,7 +38,9 @@
 			let pw=req.url.match(/[?&]password=([^&]+).*$/);								// Get pw
 			let t=req.url.match(/[?&]type=([^&]+).*$/);										// Get type
 			let role=req.url.match(/[?&]role=([^&]+).*$/);									// Get role
-			e=e ? e[1] : "";	pw=pw ? pw[1] : ""; 	t=t ? t[1] : "";					// Get value, if any
+			let id=req.url.match(/[?&]id=([^&]+).*$/);										// Get id
+			e=e ? e[1] : "";	pw=pw ? pw[1] : ""; 										// Get value, if any
+			t=t ? t[1] : "";  	id=id ? id[1] : ""; 				
 
 			if (act == "login") 															// LOGIN
 				LogIn(e, pw, "PALOGIN",role,(r)=>{ SendResponse(r, res) });					// Do login
@@ -56,7 +58,16 @@
 					Save(e, pw, title ? title : "", body, t, (r)=>{ SendResponse(r, res); });	// Save to DB
 					});
 				}
-		}
+			else if (act == "update") {														// UPDATE
+				let body="";																// Hold body
+				req.on('data', function(data) {	body+=data;	});								// ON data
+				req.on('end', function() {													// On done
+					Update(id, JSON.parse(body), (r)=>{ SendResponse(r, res); });			// Save to DB
+					});
+				}
+			else if (act == "delete")														// DELETE
+				Delete(id, (r)=>{ SendResponse(JSON.stringify(r), res); }) 					// Remove from DB
+			}
 		catch(e) { console.log(e); }
 	}
 
@@ -180,22 +191,36 @@
 		catch(e) { console.log(e) }
 	}
 
-	function Update(id, title, data, callback)											// UPDATE ROW
+	function Update(id, d, callback)													// UPDATE ROW
 	{
-			try{
+		try{
 			Open();																			// Open DB
-			db.run(`UPDATE db SET date=datetime("now"), title='${title}', data='${data}' 
-					WHERE id='${id}' AND title ='${title}')`,
+			db.run(`UPDATE db SET date=datetime("now"), title='${d.title}', data='${d.data}', email='${d.email}',
+					role='${d.role}', password='${d.password}' WHERE id='${id}'`,
 					function(err) {															// Insert
-						trace(email+" updated...");
+						trace(d+" updated...");
 						if (err)	callback(err.message);									// Error
-						else 		callback(""+this.lastID);								// Return row id
+						else 		callback(""+id);										// Return row id
 				});
 			Close();																		// Close db
 			}
 		catch(e) { console.log(e) }
 	}
 
+	function Delete(id, callback)														// DELETE ROW
+	{
+		try{
+			Open();																			// Open DB
+			db.run(`DELETE FROM db WHERE id='${id}'`,
+					function(err) {															// Insert
+						trace(id+" delete...");
+						if (err)	callback(err.message);									// Error
+						else 		callback(""+id);										// Return row id
+				});
+			Close();																		// Close db
+			}
+		catch(e) { console.log(e) }
+	}
 
 // HELPERS ////////////////////////////////////////////////////////////////////////////////////////////////////////
 

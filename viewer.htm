@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<link REL="SHORTCUT ICON" HREF="img/favicon.ico">
-		<title>AgileDB Monitor</title>
+		<title>AgileDB Data viewer</title>
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 		<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jsgrid/1.5.3/jsgrid.min.css" />
@@ -46,12 +46,19 @@
 </style>
 	<body>
 		<div class="lz-main" id="mainDiv">
-			<img src="img/smlogo.png" style="position:absolute;left:56px;bottom:12px;width:68px">
+			<img src="img/smlogo.png" style="height:80px;margin:12px">
+			<span style="vertical-align:40px;font-size:32px;margin-right:12px"><b>DATA VIEWER</b></span>
+			<select id="typeChoice" class="lz-is" style="vertical-align:48px;width:auto">
+				<option value="AG">Game sessions</option>
+				<option value="PA">PrimaryAccess movies</option>
+				<option value="PAPRO">PrimaryAccess projects</option>
+				<option value="PALOGIN">PrimaryAccess logins</option>
+			</select>
 			<div id="jsGrid-data"></div>
 		</div>
 			<div id="splashDiv" class="lz-splash">
 			<img src="img/ACTlogo.png" style='width:200px' alt="logo"><br>
-			<br><p style="color:#000;font-size:14px"><em>Game monitor</em></p>
+			<br><p style="color:#000;font-size:14px"><em>DATA VIEWER</em></p>
 			<br><p style="color:#000;font-size:14px"><b>Please type your password below</b></p>
 			<p></p><input class='lz-is'  type='password' id='lz-login'></p>
 			<br><br><br><br><div style="font-size:11px">&copy; 2022 StageTools </div>
@@ -79,7 +86,13 @@
 				app=new App();																		// Load app
 				}
 			});
-		$(window).on("keydown",function(e) {														// HANDLE KEYPRESS
+
+		$("#typeChoice").on("change",()=> { 														// ON LOG IN
+			app.curType=$("#typeChoice").val();														// Set type
+			app.Load();																				// Load from SQL
+			});
+
+			$(window).on("keydown",function(e) {													// HANDLE KEYPRESS
 			if ((e.which == 81) && e.ctrlKey){														// Test key (CTL-Q)
 				}
 			});
@@ -94,30 +107,59 @@ class App  {
 	constructor()   																			// CONSTRUCTOR
 	{
 		app=this;																					// App global pointer
+		this.curType="AG";																			// Current type of data to load
 		this.InitGrid();																			// Init grid
 		$("#jsGrid-data").jsGrid("option","data",[]);												// Add lines to grid
 	}
 
-
-	InitGrid()																						// INIT JSGRID
+	InitGrid()																					// INIT JS GRID
 	{
-		this.pFields=[ { name:"id", type:"text", width:50, validate:"required"},
-			{ name:"type", type:"text", width:50, validate:"required"},
-			{ name:"date", type:"text", width:100, validate:"required" },
-			{ name:"email", type:"text", width:100},
-			{ name:"role", type:"text", width:50 },
-			{ name:"password", type:"text",width:50 },
-			{ name:"data", type:"text",width:100 },
+		this.pFields=[ { name:"id", type:"number", width:25, validate:"required"},
+			{ name:"date", type:"text", width:50, validate:"required" },
+			{ name:"email", type:"text", width:50 },
+			{ name:"role", type:"text", width:25},
+			{ name:"password", type:"text",width:25 },
+			{ name:"data", type:"text",width:200 },
 			{ type: "control" }];
 
 		$("#jsGrid-data").jsGrid({ width:"100%", height:"calc(100vh - 168px)",
 				inserting:true, editing:true, sorting:true,
 				fields: this.pFields, data:[],
-				onItemEditing: function(args) { app.curRow=args.itemIndex;  }
+				onItemEditing: function(args) { app.curRow=args.itemIndex;  },
+				onItemDeleted: function(args) { app.DeleteRow(args.item.id) },    
+				onItemUpdated: function(args) { app.UpdateRow(args.item)    }    
 				});
-	
-		$("#jsGrid-data").css("padding",0)		
+		$("#jsGrid-data").css({padding:0, "font-size":"12px"});										// Style		
+		this.Load();																				// Load data	
 	}
+
+	DeleteRow(id)																				// DELETE ROW FROM SQL
+	{
+		fetch(`//${window.location.host}:8081?q=delete&id=${id}`)									// Fetch SQL  to trigger delete
+			.then(res => res.json()).then(data =>{ trace(data); });									// Return value	
+	}
+
+	UpdateRow(rowData)																			// UPDATE SQL ROW 
+	{
+		fetch(`//${window.location.host}:8081?q=update&id=${rowData.id}`,							// Fetch SQL to trigger update
+			{ method:"POST", "Content-Type":"application/json", body:JSON.stringify(rowData)})		// POST body
+		.then(res => res.json()).then(data =>{ trace(data); });										// Return value	
+	}
+
+
+	Load()																						// LOAD DATA FROM SQL
+	{
+		fetch(`//${window.location.host}:8081?q=loadall&a=b&type=${this.curType}`)					// Fetch dat from SQL
+			.then(res => res.json())																// Get as JSON
+			.then(data =>{$("#jsGrid-data").jsGrid("option","data",data); });						// Fill grid	
+	}
+
+	SaveAsCSV(type)																					// SAVE AS CSV FILE
+	{
+		let str=Papa.unparse(data,{ header:true, skipEmptyLines:true, });								// Make CSV using lib
+		SaveTextAsFile("AGDatabase.csv", str);											// Save to file
+	}
+
 
 } // Class closure
 
