@@ -47,13 +47,14 @@
 	<body>
 		<div class="lz-main" id="mainDiv">
 			<img src="img/smlogo.png" style="height:80px;margin:12px">
-			<span style="vertical-align:40px;font-size:32px;margin-right:12px"><b>DATA VIEWER</b></span>
+			<span style="vertical-align:42px;font-size:30px;margin-right:12px"><b>DATA VIEWER</b></span>
 			<select id="typeChoice" class="lz-is" style="vertical-align:48px;width:auto">
 				<option value="AG">Game sessions</option>
 				<option value="PA">PrimaryAccess movies</option>
 				<option value="PAPRO">PrimaryAccess projects</option>
 				<option value="PALOGIN">PrimaryAccess logins</option>
 			</select>
+			<div class="lz-bs" style="float:right;margin:40px 16px 0 0" onclick="app.SaveAsCSV()">Save as CSV file</div>
 			<div id="jsGrid-data"></div>
 		</div>
 			<div id="splashDiv" class="lz-splash">
@@ -154,10 +155,11 @@ class App  {
 			.then(data =>{$("#jsGrid-data").jsGrid("option","data",data); });						// Fill grid	
 	}
 
-	SaveAsCSV(type)																					// SAVE AS CSV FILE
+	SaveAsCSV()																					// SAVE AS CSV FILE
 	{
+		let data=$("#jsGrid-data").jsGrid("option","data");												// Get from grid													
 		let str=Papa.unparse(data,{ header:true, skipEmptyLines:true, });								// Make CSV using lib
-		SaveTextAsFile("AGDatabase.csv", str);											// Save to file
+		SaveTextAsFile("*.csv", str);																	// Save to file
 	}
 
 
@@ -228,7 +230,7 @@ class App  {
 	function SaveTextAsFile(file, contents)															// SAVE TEXT TO LOCAL FILE
 	{
 		if (file.charAt(0) == "*") {																	// If asking
-			GetTextBox("Type file name","", file.substr(1), (s)=>{ SaveTextAsFile(s, contents); });		// Ask for name
+				GetTextBox("Type file name","", "", (s)=>{ SaveTextAsFile(s+file.substr(1), contents); });		// Ask for name
 			return;																						// Quit
 			}
 		var textFileAsBlob=new Blob([contents], {type:'text/plain'});

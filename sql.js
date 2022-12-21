@@ -12,7 +12,7 @@
 //	local: node ../agileSQL/sql.js
 //	server: cd /opt/bitnami/wordpress/db | forever stop sql.js | forever start sql.js 
 //	admin with sqlStudio.exe in c:/cc
-//  ssh -i c:/Bill/CC/js/agile.pem bitnami@54.88.128.161 (access console via terminal)
+//  ssh -i c:/Bill/CC/js/agile.pem bitnami@54.88.128.161
 
 	const sqlite3 = require('sqlite3').verbose();
 	const os = require("os");	
@@ -23,6 +23,16 @@
 //SERVER ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 	const local=os.hostname().match(/^bill|desktop/i) ? true : false;					// Running on localhost?
+	const dbPath=local ? "../agileSQL/agile.db" : "../db/agile.db";						// Set path
+	let archiveTerm=1000*60*60*24*2;													// Archive DB every 2 days
+	
+	setInterval(()=>{																	// ARCHIVE TIMER
+		try{
+			let newName="BU-"+new Date().toISOString().substring(0,10)+".db";				// File name
+			fs.copyFile(dbPath,newName, (e)=>{ if (e) console.log(e) });					// Copy db file
+			} catch(e) { console.log(e) }
+		}, archiveTerm);																	// Every 10 seconds
+
 
 	const OnRequest = function (req, res) 												// REQUEST LOOP
 		{
@@ -39,7 +49,7 @@
 			let t=req.url.match(/[?&]type=([^&]+).*$/);										// Get type
 			let role=req.url.match(/[?&]role=([^&]+).*$/);									// Get role
 			let id=req.url.match(/[?&]id=([^&]+).*$/);										// Get id
-			e=e ? e[1] : "";	pw=pw ? pw[1] : ""; 										// Get value, if any
+			e=e ? e[1] : "";	pw=pw ? pw[1] : ""; 										// Get values, if any
 			t=t ? t[1] : "";  	id=id ? id[1] : ""; 				
 
 			if (act == "login") 															// LOGIN
@@ -85,7 +95,6 @@
 // SQL ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	var db;																				// Holds database
-	const dbPath=local ? "../agileSQL/agile.db" : "../db/agile.db";						// Set path
 
 	function Open()																	// OPEN DB
 	{
