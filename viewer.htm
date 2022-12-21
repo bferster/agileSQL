@@ -58,11 +58,11 @@
 			<div id="jsGrid-data"></div>
 		</div>
 			<div id="splashDiv" class="lz-splash">
-			<img src="img/ACTlogo.png" style='width:200px' alt="logo"><br>
-			<br><p style="color:#000;font-size:14px"><em>DATA VIEWER</em></p>
-			<br><p style="color:#000;font-size:14px"><b>Please type your password below</b></p>
-			<p></p><input class='lz-is'  type='password' id='lz-login'></p>
-			<br><br><br><br><div style="font-size:11px">&copy; 2022 StageTools </div>
+			<img src="img/ACTlogo.png" style='width:200px' alt="logo"><br><br>
+			<p style="color:#000;font-size:14px"><b>Email: &nbsp; &nbsp;  &nbsp; </b><input class='lz-is' type='text' id='email' style="margin:4px"><br>
+				<b>Password: </b><input class='lz-is' type='password' id='password'></p><br><br>
+					<div id="loginBut" class="lz-bs">LOG IN</div>
+					<br><br><br><br><div style="font-size:11px">&copy; 2022 StageTools </div>
 		</div>
 	
 <script>
@@ -74,28 +74,26 @@
 	var app=null;
 
 	$(document).ready(function() {								           							// ON PAGE LOADED
-		if (window.location.host != "localhost") 													// Not in debug
-			$("#splashDiv").fadeIn(2000);															// Fade in splash page
-		else {	
-			$("#mainDiv").fadeIn(0);																// Load fast
-			app=new App();																			// Load app
-			}
-		$("#lz-login").on("change",()=> { 															// ON LOG IN
-			if ($("#lz-login").val().trim() == 7001) {												// Set player name
-				$("#splashDiv").fadeOut();															// Fade out splash
-				$("#mainDiv").fadeIn(2000);															// Fade in main
-				app=new App();																		// Load app
-				}
-			});
+		$("#splashDiv").fadeIn(2000);																// Fade in splash page
+		$("#loginBut").on("click",()=> { 															// ON LOG IN
+			fetch(`//${window.location.host}:8081?q=login&role=admin&email=${$("#email").val()}&password=${$("#password").val()}`)
+				.then(res => res.text())															// Get as text
+				.then(text =>{																		// Process																	
+					if (text != "OK") {																// Bad password or email
+						Sound("delete");															// Delete sound
+						PopUp("Sorry, but that's not the right email or password");					// Alert
+						return;																		// Quit
+						}	
+					app=new App();																	// Load app
+					$("#mainDiv").fadeIn(2000);														// Fade in splash page
+					$("#splashDiv").remove();														// Remove splash
+					});
+				});
+
 
 		$("#typeChoice").on("change",()=> { 														// ON LOG IN
 			app.curType=$("#typeChoice").val();														// Set type
 			app.Load();																				// Load from SQL
-			});
-
-			$(window).on("keydown",function(e) {													// HANDLE KEYPRESS
-			if ((e.which == 81) && e.ctrlKey){														// Test key (CTL-Q)
-				}
 			});
 	});
 
@@ -161,7 +159,6 @@ class App  {
 		let str=Papa.unparse(data,{ header:true, skipEmptyLines:true, });								// Make CSV using lib
 		SaveTextAsFile("*.csv", str);																	// Save to file
 	}
-
 
 } // Class closure
 

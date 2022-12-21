@@ -49,7 +49,7 @@
 			let t=req.url.match(/[?&]type=([^&]+).*$/);										// Get type
 			let role=req.url.match(/[?&]role=([^&]+).*$/);									// Get role
 			let id=req.url.match(/[?&]id=([^&]+).*$/);										// Get id
-			e=e ? e[1] : "";	pw=pw ? pw[1] : ""; 										// Get values, if any
+			e=e ? e[1] : "";	pw=pw ? pw[1] : "";    role=role ? role[1] : "";			// Get values, if any
 			t=t ? t[1] : "";  	id=id ? id[1] : ""; 				
 
 			if (act == "login") 															// LOGIN
@@ -124,7 +124,6 @@
 			Open();																			// Open DB
 			let q=`SELECT * FROM db WHERE email = '${email}' AND type = '${type}'`;			// Make query
 			if (role) q+=` AND role = '${role}'`;											// Add role if set
-
 			db.all(q, (err, rows) => {														// Look for email
 				if (err) console.error(err.message);										// An error
 				else{																		// Good query
