@@ -129,7 +129,7 @@ class App  {
 				onItemUpdated: function(args) { app.UpdateRow(args.item)    }    
 				});
 		$("#jsGrid-data").css({padding:0, "font-size":"12px"});										// Style		
-		this.Load();																				// Load data	
+			this.Load();																				// Load data	
 	}
 
 	DeleteRow(id)																				// DELETE ROW FROM SQL
@@ -150,7 +150,9 @@ class App  {
 	{
 		fetch(`//${window.location.host}:8081?q=loadall&a=b&type=${this.curType}`)					// Fetch dat from SQL
 			.then(res => res.json())																// Get as JSON
-			.then(data =>{$("#jsGrid-data").jsGrid("option","data",data); });						// Fill grid	
+			.then(data =>{$("#jsGrid-data").jsGrid("option","data",data); 							// Fill grid with data	
+						  $("#jsGrid-data").jsGrid("sort", { field: "id", order: "desc" });			// Sort by id, latest first
+ 						  });						
 	}
 
 	SaveAsCSV()																					// SAVE AS CSV FILE
