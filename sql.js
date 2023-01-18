@@ -43,19 +43,22 @@
 				'Access-Control-Max-Age': 2592000 // 30 days
 				 };
 			res.writeHead(200, headers);													// Write headers
-			let act=req.url.match(/[?&]q=([^&]+).*$/)[1];									// Get action
+			let act=req.url.match(/[?&]q=([^&]+).*$/);										// Get action
 			let e=req.url.match(/[?&]email=([^&]+).*$/);									// Get email
 			let pw=req.url.match(/[?&]password=([^&]+).*$/);								// Get pw
 			let t=req.url.match(/[?&]type=([^&]+).*$/);										// Get type
 			let role=req.url.match(/[?&]role=([^&]+).*$/);									// Get role
 			let id=req.url.match(/[?&]id=([^&]+).*$/);										// Get id
-			e=e ? e[1] : "";	pw=pw ? pw[1] : "";    role=role ? role[1] : "";			// Get values, if any
-			t=t ? t[1] : "";  	id=id ? id[1] : ""; 				
-
+			let qy=req.url.match(/[?&]qy=([^&]+).*$/);										// Get query
+			e=e ? e[1] : "";	pw=pw ? pw[1] : "";    	role=role ? role[1] : "";			// Get values, if any
+			t=t ? t[1] : "";  	qy=qy ? qy[1] : "";		id=id ? id[1] : ""; 				
+			act=id ? act[1] : ""; 
 			if (act == "login") 															// LOGIN
 				LogIn(e, pw, "PALOGIN",role,(r)=>{ SendResponse(r, res) });					// Do login
 			else if (act == "list")															// LIST
 				List(e,t,(r)=>{ SendResponse(JSON.stringify(r), res); })					// Get from DB
+			else if (act == "query")														// LIST
+				Query(qy,t,(r)=>{ SendResponse(JSON.stringify(r), res); })					// Get from DB
 			else if (act == "load")															// LOAD
 				Load(req.url.match(/id=(.*)/)[1],(r)=>{ SendResponse(JSON.stringify(r), res); }) // Get from DB
 			else if (act == "loadall")														// LOAD ALL
@@ -230,6 +233,23 @@
 		catch(e) { console.log(e) }
 	}
 
+	function Query(query, type, callback)												// GET LIST OF ROW(S) BY QUERY
+	{
+		try{
+			Open();																			// Open DB
+			query=query.replace(/%20/g," ");												// Back to spaces
+			query=query.replace(/%27/g,"'");												// Apos
+			db.all(`SELECT * FROM db WHERE ${query} AND type = '${type}'`, (err, rows) => { // Query
+				if (err)	callback(err.message);											// Error
+				else 		callback(rows);													// Registered
+				});
+			Close();																		// Close db
+		}
+		catch(e) { console.log(e) }
+	}
+
+
+	
 // HELPERS ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function trace(msg, p1, p2, p3, p4)																// CONSOLE 
