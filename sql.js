@@ -42,6 +42,7 @@
 				'Access-Control-Allow-Methods': 'POST, GET',
 				'Access-Control-Max-Age': 2592000 // 30 days
 				 };
+			
 			res.writeHead(200, headers);													// Write headers
 			let act=req.url.match(/[?&]q=([^&]+).*$/);										// Get action
 			let e=req.url.match(/[?&]email=([^&]+).*$/);									// Get email
@@ -52,7 +53,7 @@
 			let qy=req.url.match(/[?&]qy=([^&]+).*$/);										// Get query
 			e=e ? e[1] : "";	pw=pw ? pw[1] : "";    	role=role ? role[1] : "";			// Get values, if any
 			t=t ? t[1] : "";  	qy=qy ? qy[1] : "";		id=id ? id[1] : ""; 				
-			act=id ? act[1] : ""; 
+			act=act ? act[1] : ""; 
 			if (act == "login") 															// LOGIN
 				LogIn(e, pw, "PALOGIN",role,(r)=>{ SendResponse(r, res) });					// Do login
 			else if (act == "list")															// LIST
