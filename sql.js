@@ -14,6 +14,11 @@
 //	admin with sqlStudio.exe in c:/cc
 //  ssh -i c:/Bill/CC/js/agile.pem bitnami@54.88.128.161
 
+// 	RENEW LETS ENCRYT SSL
+//	sudo /opt/bitnami/ctlscript.sh stop
+//	sudo /opt/bitnami/letsencrypt/lego --tls --email="bferster@stagetools.com" --domains="agileteacher.org" --path="/opt/bitnami/letsencrypt" renew --days 90
+//	sudo /opt/bitnami/letsencrypt/lego --path /opt/bitnami/letsencrypt list
+
 	const sqlite3 = require('sqlite3').verbose();
 	const os = require("os");	
 	const https = require('https');
