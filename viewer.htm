@@ -49,7 +49,9 @@
 			<img src="img/smlogo.png" style="height:80px;margin:12px">
 			<span style="vertical-align:42px;font-size:30px;margin-right:12px"><b>DATA VIEWER</b></span>
 			<select id="typeChoice" class="lz-is" style="vertical-align:48px;width:auto">
+				<option value="TWG">Grace sessions</option>
 				<option value="AG">Game sessions</option>
+				<option value="AGQ">Game assessments</option>
 				<option value="PA">PrimaryAccess movies</option>
 				<option value="PAPRO">PrimaryAccess projects</option>
 				<option value="PALOGIN">PrimaryAccess logins</option>
@@ -106,7 +108,7 @@ class App  {
 	constructor()   																			// CONSTRUCTOR
 	{
 		app=this;																					// App global pointer
-		this.curType="AG";																			// Current type of data to load
+		this.curType="TWG";																		// Current type of data to load
 		this.InitGrid();																			// Init grid
 		$("#jsGrid-data").jsGrid("option","data",[]);												// Add lines to grid
 	}

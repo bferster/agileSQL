@@ -14,10 +14,11 @@
 //	admin with sqlStudio.exe in c:/cc
 //  ssh -i c:/Bill/CC/js/agile.pem bitnami@54.88.128.161
 
-// 	RENEW LETS ENCRYT SSL
+// 	RENEW LETSENCRYPT SSL
 //	sudo /opt/bitnami/ctlscript.sh stop
 //	sudo /opt/bitnami/letsencrypt/lego --tls --email="bferster@stagetools.com" --domains="agileteacher.org" --path="/opt/bitnami/letsencrypt" renew --days 90
 //	sudo /opt/bitnami/letsencrypt/lego --path /opt/bitnami/letsencrypt list
+// 	sudo /opt/bitnami/ctlscript.sh start
 
 	const sqlite3 = require('sqlite3').verbose();
 	const os = require("os");	
@@ -35,7 +36,7 @@
 		try{
 			let newName="BU-"+new Date().toISOString().substring(0,10)+".db";				// File name
 			fs.copyFile(dbPath,newName, (e)=>{ if (e) console.log(e) });					// Copy db file
-			} catch(e) { console.log(e) }
+			} catch(e) { console.log("set interval",e) }
 		}, archiveTerm);																	// Every 10 seconds
 
 
@@ -87,7 +88,7 @@
 			else if (act == "delete")														// DELETE
 				Delete(id, (r)=>{ SendResponse(JSON.stringify(r), res); }) 					// Remove from DB
 			}
-		catch(e) { console.log(e); }
+		catch(e) { console.log("on request",e); }
 	}
 
 	let server;
@@ -163,7 +164,7 @@
 				});
 			Close();																		// Close db
 		}
-		catch(e) { console.log(e) }
+		catch(e) { "list",console.log(e) }
 	}
 
 	function Load(id, callback)															// GET ROW BY ID
@@ -189,7 +190,7 @@
 				});
 			Close();																		// Close db
 		}
-		catch(e) { console.log(e) }
+		catch(e) { "loadall", console.log(e) }
 	}
 	
 	function Save(email, password, title, data, type, callback)							// SAVE ROW
@@ -205,7 +206,7 @@
 				});
 			Close();																		// Close db
 			}
-		catch(e) { console.log(e) }
+		catch(e) { "save", console.log(e) }
 	}
 
 	function Update(id, d, callback)													// UPDATE ROW
@@ -221,7 +222,7 @@
 				});
 			Close();																		// Close db
 			}
-		catch(e) { console.log(e) }
+		catch(e) { "update", console.log(e) }
 	}
 
 	function Delete(id, callback)														// DELETE ROW
@@ -236,7 +237,7 @@
 				});
 			Close();																		// Close db
 			}
-		catch(e) { console.log(e) }
+		catch(e) { "delete", console.log(e) }
 	}
 
 	function Query(query, type, callback)												// GET LIST OF ROW(S) BY QUERY
@@ -251,7 +252,7 @@
 				});
 			Close();																		// Close db
 		}
-		catch(e) { console.log(e) }
+		catch(e) {"query",console.log(e), query }
 	}
 
 
